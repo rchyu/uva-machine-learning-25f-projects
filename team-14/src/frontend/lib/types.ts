@@ -1,18 +1,15 @@
 export type ItemStatus = "in_fridge" | "removed";
 
-export interface Item {
-  _id: string;          
-  name: string;
-  image?: {                
-    url: string;
-    file_id: string;
-  };
-  date_placed: string;   
-  expiration_date: string; 
-  category?: string;
-  confidence?: number;
-  status?: string;
-}
+export type Item = {
+  id: string;
+  label: string;
+  category: string;
+  confidence: number;
+  createdAt: string;   // ISO
+  expiresAt?: string;  // ISO
+  status: ItemStatus;
+  imageUrl?: string;   // object URL or placeholder
+};
 
 export type FridgeEventType = "IN" | "OUT";
 

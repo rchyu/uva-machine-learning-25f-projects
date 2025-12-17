@@ -17,7 +17,6 @@ export default function ScanPage() {
   const [manualLabel, setManualLabel] = useState<string>("");
 
   const classes = Object.keys(listCategoryImages());
-  const FLASK_API_URL = "http://127.0.0.1:5000"; // Ideally put this in .env
 
   async function loadEvents() {
     const ev = await api_listEvents();
@@ -41,27 +40,9 @@ export default function ScanPage() {
 
   async function scanIn() {
     if (!file) return alert("Upload an image first.");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "IN"); 
-
-      const response = await fetch(`${FLASK_API_URL}/api/scan`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Server error");
-
-      const data = await response.json();
-
-      setLast(data);
-      await loadEvents(); 
-    } catch (error) {
-      console.error("Scan failed:", error);
-      alert("Failed to send data to server.");
-    }
+    const res = await api_scanIn({ name: file.name, imageUrl: preview });
+    setLast(res);
+    await loadEvents();
   }
 
   async function scanOut() {
@@ -73,26 +54,12 @@ export default function ScanPage() {
 
   async function addManual() {
     if (!manualLabel) return alert("Select an item first.");
-
-    try {
-      const response = await fetch(`${FLASK_API_URL}/api/manual-add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          label: manualLabel,
-          type: "IN"
-        }),
-      });
-
-      const data = await response.json();
-      setLast(data);
-      await loadEvents();
-      setManualLabel("");
-    } catch (error) {
-      console.error("Manual add failed:", error);
-    }
+    // Create a fake file with name = label to trigger detection
+    const fakeFile = { name: manualLabel, imageUrl: undefined };
+    const res = await api_scanIn(fakeFile);
+    setLast(res);
+    await loadEvents();
+    setManualLabel("");
   }
 
   return (
